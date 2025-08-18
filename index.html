@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile2Pass - Generador de Diccionarios OSINT</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="logo-container">
+        <img src="logo.png" alt="Profile2Pass Logo">
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Profile2Pass</h1>
+            <p>Genera diccionarios de fuerza bruta basados en información de perfil (OSINT).</p>
+        </div>
+
+        <div class="main-section">
+            <div class="input-form">
+                <h2>Introducir datos de perfil</h2>
+                <div class="form-section">
+                    <h3>Información Personal</h3>
+                    <div class="input-group">
+                        <label for="name">Nombre:</label>
+                        <input type="text" id="name" placeholder="Ej: Juan">
+                    </div>
+                    <div class="input-group">
+                        <label for="surname1">Primer Apellido:</label>
+                        <input type="text" id="surname1" placeholder="Ej: García">
+                    </div>
+                    <div class="input-group">
+                        <label for="surname2">Segundo Apellido:</label>
+                        <input type="text" id="surname2" placeholder="Ej: Pérez">
+                    </div>
+                    <div class="input-group">
+                        <label for="nickname">Alias / Apodo:</label>
+                        <input type="text" id="nickname" placeholder="Ej: El Pibe">
+                    </div>
+                    <div class="input-group">
+                        <label for="birthdate">Fecha de Nacimiento:</label>
+                        <input type="text" id="birthdate" placeholder="DD-MM-AAAA">
+                    </div>
+                    <div class="input-group">
+                        <label for="birthyear">Año de Nacimiento:</label>
+                        <input type="text" id="birthyear" placeholder="Ej: 1985">
+                    </div>
+                    <div class="input-group">
+                        <label for="partnerName">Nombre de Pareja:</label>
+                        <input type="text" id="partnerName" placeholder="Ej: Ana">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Familia</h3>
+                    <div class="input-group">
+                        <label for="fatherName">Nombre del Padre:</label>
+                        <input type="text" id="fatherName" placeholder="Ej: Antonio">
+                    </div>
+                    <div class="input-group">
+                        <label for="motherName">Nombre de la Madre:</label>
+                        <input type="text" id="motherName" placeholder="Ej: María">
+                    </div>
+                    <div class="input-group">
+                        <label for="siblings">Nombres de Hermanos (separados por coma):</label>
+                        <input type="text" id="siblings" placeholder="Ej: Jose, Laura">
+                    </div>
+                    <div class="input-group">
+                        <label for="children">Nombres de Hijos (separados por coma):</label>
+                        <input type="text" id="children" placeholder="Ej: Daniel, Sofía">
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Detalles Adicionales</h3>
+                    <div class="input-group">
+                        <label for="pet">Mascota:</label>
+                        <input type="text" id="pet" placeholder="Ej: Rex">
+                    </div>
+                    <div class="input-group">
+                        <label for="city">Ciudad:</label>
+                        <input type="text" id="city" placeholder="Ej: Madrid">
+                    </div>
+                    <div class="input-group">
+                        <label for="company">Empresa:</label>
+                        <input type="text" id="company" placeholder="Ej: Google">
+                    </div>
+                    <div class="input-group">
+                        <label for="school">Colegio/Universidad:</label>
+                        <input type="text" id="school" placeholder="Ej: Oxford">
+                    </div>
+                    <div class="input-group">
+                        <label for="team">Equipo Deportivo:</label>
+                        <input type="text" id="team" placeholder="Ej: Real Madrid">
+                    </div>
+                    <div class="input-group">
+                        <label for="hobby">Hobby/Interés:</label>
+                        <input type="text" id="hobby" placeholder="Ej: futbol">
+                    </div>
+                    <div class="input-group">
+                        <label for="dni">Número de Identificación (DNI/NIF):</label>
+                        <input type="text" id="dni" placeholder="Ej: 12345678A">
+                    </div>
+                    <div class="input-group">
+                        <label for="ssn">Número de Seguridad Social:</label>
+                        <input type="text" id="ssn" placeholder="Ej: 1234567890">
+                    </div>
+                    <div class="input-group">
+                        <label for="phone">Teléfono:</label>
+                        <input type="text" id="phone" placeholder="Ej: 600112233">
+                    </div>
+                </div>
+                
+                <button id="generateBtn">Generar Diccionario</button>
+            </div>
+            
+            <div class="json-upload">
+                <h2>O subir desde JSON</h2>
+                <p>O sube un archivo JSON con los datos del perfil.</p>
+                <input type="file" id="jsonInput" accept=".json">
+                <button id="uploadBtn">Generar desde JSON</button>
+            </div>
+        </div>
+
+        <div class="output-section">
+            <h2>Diccionario Generado</h2>
+            <p id="wordCount">Total de palabras: 0</p>
+            <textarea id="outputDictionary" readonly></textarea>
+            <button id="downloadBtn">Descargar como .txt</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
