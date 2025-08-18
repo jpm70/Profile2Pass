@@ -1,140 +1,169 @@
-body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background-color: #0d1117;
-    color: #c9d1d9;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-    box-sizing: border-box;
-}
+document.addEventListener('DOMContentLoaded', () => {
+    const generateBtn = document.getElementById('generateBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const jsonInput = document.getElementById('jsonInput');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const outputDictionary = document.getElementById('outputDictionary');
+    const wordCountDisplay = document.getElementById('wordCount');
 
-.logo-container {
-    text-align: center;
-    margin-bottom: 20px;
-}
+    const commonNumbers = ['1', '123', '321', '11', '01', '02', '10', '100', '1234', '12345'];
 
-.logo-container img {
-    width: 150px;
-    height: auto;
-}
+    function generateDictionary(data) {
+        console.log("Datos de perfil recibidos:", data);
 
-.container {
-    background-color: #161b22;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
-    width: 90%;
-    max-width: 800px;
-    text-align: center;
-    margin: 0 auto;
-}
+        const dictionary = new Set();
+        const keywords = [];
 
-.header {
-    margin-bottom: 30px;
-}
+        function addVariations(word) {
+            if (!word) return;
+            word = word.toLowerCase();
+            dictionary.add(word);
+            dictionary.add(word.charAt(0).toUpperCase() + word.slice(1));
+            if (word.length > 3) {
+                dictionary.add(word.toUpperCase());
+            }
+        }
+        
+        function processData(inputData) {
+            // Información Personal
+            addVariations(inputData.name);
+            addVariations(inputData.surname1);
+            addVariations(inputData.surname2);
+            if (inputData.nickname) addVariations(inputData.nickname);
+            if (inputData.birthyear) {
+                dictionary.add(inputData.birthyear);
+                dictionary.add(inputData.birthyear.slice(-2));
+            }
+            if (inputData.birthdate) {
+                const parts = inputData.birthdate.split(/[-/.]/);
+                if (parts.length === 3) {
+                    dictionary.add(parts[0]);
+                    dictionary.add(parts[1]);
+                    dictionary.add(parts[2]);
+                    dictionary.add(parts[0] + parts[1]);
+                    dictionary.add(parts[1] + parts[0]);
+                    dictionary.add(parts[0] + parts[1] + parts[2].slice(-2));
+                }
+            }
+            if (inputData.partnerName) addVariations(inputData.partnerName);
 
-h1 {
-    color: #58a6ff;
-    border-bottom: 2px solid #30363d;
-    padding-bottom: 15px;
-    margin-bottom: 10px;
-}
+            // Familia
+            if (inputData.fatherName) addVariations(inputData.fatherName);
+            if (inputData.motherName) addVariations(inputData.motherName);
+            if (inputData.siblings) {
+                inputData.siblings.split(',').forEach(sibling => addVariations(sibling.trim()));
+            }
+            if (inputData.children) {
+                inputData.children.split(',').forEach(child => addVariations(child.trim()));
+            }
 
-p {
-    color: #8b949e;
-}
+            // Detalles Adicionales
+            if (inputData.pet) addVariations(inputData.pet);
+            if (inputData.city) addVariations(inputData.city);
+            if (inputData.company) addVariations(inputData.company);
+            if (inputData.school) addVariations(inputData.school);
+            if (inputData.team) addVariations(inputData.team);
+            if (inputData.hobby) addVariations(inputData.hobby);
+            if (inputData.dni) dictionary.add(inputData.dni);
+            if (inputData.ssn) dictionary.add(inputData.ssn);
+            if (inputData.phone) dictionary.add(inputData.phone);
 
-.main-section {
-    display: flex;
-    justify-content: space-around;
-    gap: 30px;
-    flex-wrap: wrap;
-    margin-bottom: 30px;
-    text-align: left; /* Alinea el texto a la izquierda en los formularios */
-}
+            // Generar la lista de palabras clave para combinaciones
+            const allWords = Array.from(dictionary);
+            allWords.forEach(word => keywords.push(word));
+        }
 
-.input-form, .json-upload {
-    flex: 1;
-    min-width: 250px;
-    background-color: #21262d;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #30363d;
-}
+        processData(data);
+        
+        // Generar combinaciones
+        const combinedWords = new Set();
+        keywords.forEach(word => {
+            commonNumbers.forEach(num => {
+                combinedWords.add(word + num);
+                combinedWords.add(num + word);
+            });
+            if (data.birthyear) {
+                combinedWords.add(word + data.birthyear);
+                combinedWords.add(data.birthyear + word);
+            }
+        });
+        
+        // Combinaciones entre palabras clave
+        for (let i = 0; i < keywords.length; i++) {
+            for (let j = 0; j < keywords.length; j++) {
+                if (i !== j) {
+                    combinedWords.add(keywords[i] + keywords[j]);
+                }
+            }
+        }
+        
+        const finalDictionary = new Set([...dictionary, ...combinedWords]);
+        const dictionaryArray = Array.from(finalDictionary);
+        outputDictionary.value = dictionaryArray.join('\n');
+        wordCountDisplay.textContent = `Total de palabras: ${dictionaryArray.length}`;
+    }
 
-.json-upload {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+    // Evento para el botón de generar desde el formulario
+    generateBtn.addEventListener('click', () => {
+        const profileData = {
+            name: document.getElementById('name').value.trim(),
+            surname1: document.getElementById('surname1').value.trim(),
+            surname2: document.getElementById('surname2').value.trim(),
+            nickname: document.getElementById('nickname').value.trim(),
+            birthdate: document.getElementById('birthdate').value.trim(),
+            birthyear: document.getElementById('birthyear').value.trim(),
+            partnerName: document.getElementById('partnerName').value.trim(),
+            fatherName: document.getElementById('fatherName').value.trim(),
+            motherName: document.getElementById('motherName').value.trim(),
+            siblings: document.getElementById('siblings').value.trim(),
+            children: document.getElementById('children').value.trim(),
+            pet: document.getElementById('pet').value.trim(),
+            city: document.getElementById('city').value.trim(),
+            company: document.getElementById('company').value.trim(),
+            school: document.getElementById('school').value.trim(),
+            team: document.getElementById('team').value.trim(),
+            hobby: document.getElementById('hobby').value.trim(),
+            dni: document.getElementById('dni').value.trim(),
+            ssn: document.getElementById('ssn').value.trim(),
+            phone: document.getElementById('phone').value.trim()
+        };
+        generateDictionary(profileData);
+    });
 
-.form-section {
-    border-bottom: 1px solid #30363d;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
-}
+    // Evento para el botón de subir JSON
+    uploadBtn.addEventListener('click', () => {
+        const file = jsonInput.files[0];
+        if (!file) {
+            alert('Por favor, selecciona un archivo JSON.');
+            return;
+        }
 
-.form-section h3 {
-    margin-top: 0;
-    color: #58a6ff;
-}
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                generateDictionary(data);
+            } catch (error) {
+                alert('Error al leer el archivo JSON. Asegúrate de que el formato sea válido.');
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+    });
 
-.input-group {
-    margin-bottom: 15px;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-input[type="text"] {
-    width: calc(100% - 22px);
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #30363d;
-    background-color: #010409;
-    color: #e6edf3;
-}
-
-button {
-    background-color: #238636;
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 15px;
-}
-
-button:hover {
-    background-color: #2ea043;
-}
-
-.output-section {
-    text-align: center;
-}
-
-#outputDictionary {
-    width: calc(100% - 22px);
-    height: 300px;
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #30363d;
-    background-color: #010409;
-    color: #e6edf3;
-    margin-top: 15px;
-    resize: vertical;
-}
-
-#wordCount {
-    font-weight: bold;
-    color: #58a6ff;
-}
+    // Evento para el botón de descarga
+    downloadBtn.addEventListener('click', () => {
+        const content = outputDictionary.value;
+        if (!content) {
+            alert('No hay nada que descargar.');
+            return;
+        }
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'diccionario_osint.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
+});
