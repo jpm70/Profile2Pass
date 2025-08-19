@@ -119,7 +119,13 @@
             <div class="json-upload">
                 <h2>O subir desde JSON</h2>
                 <p>O sube un archivo JSON con los datos del perfil.</p>
-                <input type="file" id="jsonInput" accept=".json" style="display: none;">
+                <div class="file-select-group">
+                    <label for="jsonInput" class="custom-file-upload">
+                        Elegir archivo
+                    </label>
+                    <input type="file" id="jsonInput" accept=".json">
+                    <span id="fileName">Ningún archivo seleccionado</span>
+                </div>
                 <button id="uploadBtn">Generar desde JSON</button>
             </div>
         </div>
