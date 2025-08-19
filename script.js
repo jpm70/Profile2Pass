@@ -29,9 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         function processData(inputData) {
             // Información Personal
-            addVariations(inputData.name);
-            addVariations(inputData.surname1);
-            addVariations(inputData.surname2);
+            if (inputData.name) addVariations(inputData.name);
+            if (inputData.surname1) addVariations(inputData.surname1);
+            if (inputData.surname2) addVariations(inputData.surname2);
             if (inputData.nickname) addVariations(inputData.nickname);
             if (inputData.birthyear) {
                 dictionary.add(inputData.birthyear);
@@ -74,6 +74,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Generar la lista de palabras clave para combinaciones
             const allWords = Array.from(dictionary);
             allWords.forEach(word => keywords.push(word));
+        }
+        
+        // Verificar si el objeto de datos está vacío o solo tiene campos vacíos
+        const hasData = Object.values(data).some(value => {
+            if (typeof value === 'string') return value.trim() !== '';
+            return value !== null && typeof value !== 'undefined';
+        });
+
+        if (!hasData) {
+            outputDictionary.value = "El archivo JSON no contiene datos de perfil válidos para generar un diccionario.";
+            wordCountDisplay.textContent = "Total de palabras: 0";
+            return;
         }
 
         processData(data);
