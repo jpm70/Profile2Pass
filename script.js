@@ -28,68 +28,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         function processData(inputData) {
-            // Información Personal
-            if (inputData.name) addVariations(inputData.name);
-            if (inputData.surname1) addVariations(inputData.surname1);
-            if (inputData.surname2) addVariations(inputData.surname2);
-            if (inputData.nickname) addVariations(inputData.nickname);
-            if (inputData.birthyear) {
-                dictionary.add(inputData.birthyear);
-                dictionary.add(inputData.birthyear.slice(-2));
+            if (Array.isArray(inputData)) {
+                inputData.forEach(row => {
+                    Object.values(row).forEach(value => {
+                        if (typeof value === 'string') {
+                            value.split(',').forEach(item => addVariations(item.trim()));
+                        }
+                    });
+                });
+            } else if (typeof inputData === 'object' && inputData !== null) {
+                Object.values(inputData).forEach(value => {
+                    if (typeof value === 'string') {
+                        value.split(',').forEach(item => addVariations(item.trim()));
+                    }
+                });
+            } else {
+                console.error("Formato de datos no válido.");
+                return;
             }
-            if (inputData.birthdate) {
-                const parts = inputData.birthdate.split(/[-/.]/);
-                if (parts.length === 3) {
-                    dictionary.add(parts[0]);
-                    dictionary.add(parts[1]);
-                    dictionary.add(parts[2]);
-                    dictionary.add(parts[0] + parts[1]);
-                    dictionary.add(parts[1] + parts[0]);
-                    dictionary.add(parts[0] + parts[1] + parts[2].slice(-2));
-                }
-            }
-            if (inputData.partnerName) addVariations(inputData.partnerName);
-
-            // Familia
-            if (inputData.fatherName) addVariations(inputData.fatherName);
-            if (inputData.motherName) addVariations(inputData.motherName);
-            if (inputData.siblings) {
-                inputData.siblings.split(',').forEach(sibling => addVariations(sibling.trim()));
-            }
-            if (inputData.children) {
-                inputData.children.split(',').forEach(child => addVariations(child.trim()));
-            }
-
-            // Detalles Adicionales
-            if (inputData.pet) addVariations(inputData.pet);
-            if (inputData.city) addVariations(inputData.city);
-            if (inputData.company) addVariations(inputData.company);
-            if (inputData.school) addVariations(inputData.school);
-            if (inputData.team) addVariations(inputData.team);
-            if (inputData.hobby) addVariations(inputData.hobby);
-            if (inputData.dni) dictionary.add(inputData.dni);
-            if (inputData.ssn) dictionary.add(inputData.ssn);
-            if (inputData.phone) dictionary.add(inputData.phone);
 
             // Generar la lista de palabras clave para combinaciones
             const allWords = Array.from(dictionary);
             allWords.forEach(word => keywords.push(word));
         }
-        
-        // Verificar si el objeto de datos está vacío o solo tiene campos vacíos
-        const hasData = Object.values(data).some(value => {
-            if (typeof value === 'string') return value.trim() !== '';
-            return value !== null && typeof value !== 'undefined';
-        });
 
-        if (!hasData) {
-            outputDictionary.value = "El archivo JSON no contiene datos de perfil válidos para generar un diccionario.";
+        // Si los datos son un array (de CSV), procesamos todas las filas
+        if (Array.isArray(data)) {
+            data.forEach(item => processData(item));
+        } else {
+            // Si los datos son un objeto (de JSON), los procesamos directamente
+            processData(data);
+        }
+
+        // Verificar si se generó alguna palabra clave antes de continuar
+        if (keywords.length === 0) {
+            outputDictionary.value = "No se encontraron palabras clave válidas en el archivo para generar un diccionario. Asegúrate de que el archivo contiene datos de perfil como nombres, apellidos, etc.";
             wordCountDisplay.textContent = "Total de palabras: 0";
             return;
         }
 
-        processData(data);
-        
         // Generar combinaciones
         const combinedWords = new Set();
         keywords.forEach(word => {
@@ -157,25 +134,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Evento para el botón de generar desde JSON
+    // Evento para el botón de generar desde JSON/CSV
     uploadBtn.addEventListener('click', () => {
         if (!loadedFile) {
-            alert('Por favor, selecciona un archivo JSON primero.');
+            alert('Por favor, selecciona un archivo JSON o CSV primero.');
             return;
         }
 
         const reader = new FileReader();
         reader.onload = (event) => {
+            const fileContent = event.target.result;
+            const fileName = loadedFile.name.toLowerCase();
+            let data = null;
+
             try {
-                const data = JSON.parse(event.target.result);
+                if (fileName.endsWith('.json')) {
+                    data = JSON.parse(fileContent);
+                } else if (fileName.endsWith('.csv')) {
+                    data = parseCSV(fileContent);
+                } else {
+                    alert('Formato de archivo no compatible. Por favor, sube un archivo .json o .csv.');
+                    return;
+                }
                 generateDictionary(data);
             } catch (error) {
-                alert('Error al leer el archivo JSON. Asegúrate de que el formato sea válido.');
+                alert('Error al leer el archivo. Asegúrate de que el formato sea válido.');
                 console.error(error);
             }
         };
         reader.readAsText(loadedFile);
     });
+    
+    // Función para procesar CSV
+    function parseCSV(csvText) {
+        const lines = csvText.split('\n').filter(line => line.trim() !== '');
+        if (lines.length === 0) return [];
+        
+        const headers = lines[0].split(',').map(header => header.trim());
+        const result = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(value => value.trim());
+            if (values.length !== headers.length) continue;
+            
+            const row = {};
+            headers.forEach((header, index) => {
+                row[header] = values[index];
+            });
+            result.push(row);
+        }
+        return result;
+    }
 
     // Evento para el botón de descarga
     downloadBtn.addEventListener('click', () => {
