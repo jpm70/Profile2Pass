@@ -28,20 +28,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         function processData(inputData) {
+            function processString(value) {
+                if (typeof value === 'string') {
+                    // Limpia la cadena de caracteres no deseados y divide por espacios
+                    const cleanedWords = value.replace(/[^a-zA-Z0-9\s]/g, '').split(/\s+/).filter(word => word.length > 2);
+                    cleanedWords.forEach(word => addVariations(word.trim()));
+                }
+            }
+
             if (Array.isArray(inputData)) {
                 inputData.forEach(row => {
-                    Object.values(row).forEach(value => {
-                        if (typeof value === 'string') {
-                            value.split(',').forEach(item => addVariations(item.trim()));
-                        }
-                    });
+                    Object.values(row).forEach(processString);
                 });
             } else if (typeof inputData === 'object' && inputData !== null) {
-                Object.values(inputData).forEach(value => {
-                    if (typeof value === 'string') {
-                        value.split(',').forEach(item => addVariations(item.trim()));
-                    }
-                });
+                Object.values(inputData).forEach(processString);
             } else {
                 console.error("Formato de datos no válido.");
                 return;
