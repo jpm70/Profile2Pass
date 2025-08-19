@@ -130,18 +130,24 @@ document.addEventListener('DOMContentLoaded', () => {
         generateDictionary(profileData);
     });
 
-    // Evento para el botón de subir JSON
+    // Nuevo evento para el botón "Generar desde JSON"
+    // Esto simula un clic en el input de archivo oculto
     uploadBtn.addEventListener('click', () => {
-        const file = jsonInput.files[0];
+        jsonInput.click();
+    });
+
+    // Evento para el input de archivo (se activa cuando el usuario selecciona un archivo)
+    jsonInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
         if (!file) {
             alert('Por favor, selecciona un archivo JSON.');
             return;
         }
 
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = (event) => {
             try {
-                const data = JSON.parse(e.target.result);
+                const data = JSON.parse(event.target.result);
                 generateDictionary(data);
             } catch (error) {
                 alert('Error al leer el archivo JSON. Asegúrate de que el formato sea válido.');
