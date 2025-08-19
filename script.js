@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('downloadBtn');
     const outputDictionary = document.getElementById('outputDictionary');
     const wordCountDisplay = document.getElementById('wordCount');
+    const fileNameDisplay = document.getElementById('fileName');
+
+    let loadedFile = null;
 
     const commonNumbers = ['1', '123', '321', '11', '01', '02', '10', '100', '1234', '12345'];
 
@@ -130,17 +133,22 @@ document.addEventListener('DOMContentLoaded', () => {
         generateDictionary(profileData);
     });
 
-    // Nuevo evento para el botón "Generar desde JSON"
-    // Esto simula un clic en el input de archivo oculto
-    uploadBtn.addEventListener('click', () => {
-        jsonInput.click();
-    });
-
-    // Evento para el input de archivo (se activa cuando el usuario selecciona un archivo)
+    // Evento para cuando el usuario elige un archivo
     jsonInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (!file) {
-            alert('Por favor, selecciona un archivo JSON.');
+        if (file) {
+            loadedFile = file;
+            fileNameDisplay.textContent = file.name;
+        } else {
+            loadedFile = null;
+            fileNameDisplay.textContent = 'Ningún archivo seleccionado';
+        }
+    });
+
+    // Evento para el botón de generar desde JSON
+    uploadBtn.addEventListener('click', () => {
+        if (!loadedFile) {
+            alert('Por favor, selecciona un archivo JSON primero.');
             return;
         }
 
@@ -154,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error(error);
             }
         };
-        reader.readAsText(file);
+        reader.readAsText(loadedFile);
     });
 
     // Evento para el botón de descarga
